@@ -41,7 +41,7 @@ public class Main {
 
   private static final int WARMUP_SIZE = 10000;
 
-  private static final int MESSAGE_SIZE = 1000000;
+  private static final int MESSAGE_SIZE = 1000000000;
 
   private static final String CONTENT = "Hello World!";
 
@@ -161,15 +161,15 @@ public class Main {
   }
 
   public static void main(String[] args) throws TException, InterruptedException {
-    warmUp();
-//    sendMessage(realPeer);  // time cost: 420ms time cost: 27961ms time cost: 83471ms       后面又测 time cost: 83458ms time cost: 28972ms
+//    warmUp();
+//    sendMessage(realPeer);  // 1w time cost: 420ms  100w time cost: 27961ms 300w time cost: 83471ms       后面又测 300w time cost: 83458ms 100w time cost: 28972ms
 //    sendMessage(proxyPeer); // time cost: 428ms time cost: 27378ms time cost: 82682ms       后面又测 time cost: 85581ms time cost: 29383ms
-    sendMessage(proxy);       // time cost: 454ms // time cost: 27268ms time cost: 82834ms    后面又测 time cost: 87090ms time cost: 28419ms
+//    sendMessage(proxy);       // time cost: 454ms // time cost: 27268ms time cost: 82834ms    后面又测 time cost: 87090ms time cost: 28419ms
 
     // ===================== local ====================
-//    beforeInstanceObj();
-//    sendLocalMessage(realPeer); // time cost: 1ms time cost: 5ms time cost: 6ms
-//    sendLocalMessage(proxyPeer); // time cost: 1ms time cost: 6ms time cost: 6ms
-//    sendLocalMessage(proxy); // time cost: 6ms time cost: 17ms time cost: 28ms
+    beforeInstanceObj();
+//    sendLocalMessage(realPeer); // 1w time cost: 1ms 100w time cost: 5ms 300w time cost: 6ms  10亿 time cost: 44ms
+//    sendLocalMessage(proxyPeer); // time cost: 1ms time cost: 6ms time cost: 6ms 10亿 time cost: 44ms
+    sendLocalMessage(proxy); // time cost: 6ms time cost: 17ms time cost: 28ms     10亿 time cost: 3185ms
   }
 }
