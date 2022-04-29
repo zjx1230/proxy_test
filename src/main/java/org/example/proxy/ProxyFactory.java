@@ -21,6 +21,7 @@ package org.example.proxy;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import javax.swing.plaf.synth.SynthStyle;
 
 /**
  * TODO
@@ -53,6 +54,7 @@ public class ProxyFactory {
         new InvocationHandler() {
           @Override
           public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            System.out.println(method.getName());
             return method.invoke(target, args);
         }
     });

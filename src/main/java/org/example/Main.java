@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import org.apache.thrift.TException;
+import org.example.proxy.CglibProxy;
 import org.example.proxy.MessageClient;
 import org.example.proxy.ProxyFactory;
 import org.example.proxy.ProxyPeer;
@@ -39,13 +40,17 @@ import org.example.thrift.Operation;
  */
 public class Main {
 
-  private static final int WARMUP_SIZE = 10000;
+  final static String AOP_CGLIB_TARGET_FIELD = "CGLIB$CALLBACK_0";
+
+  private static final int WARMUP_SIZE = 1000;
 
   private static final int MESSAGE_SIZE = 1000000000;
 
   private static final String CONTENT = "Hello World!";
 
   private static RpcProtocol realPeer, proxyPeer, proxy;
+
+  private static RealPeer cglibProxyPeer;
 
   private static Message generateMessage(Random random) {
     Message message = new Message();
@@ -140,12 +145,23 @@ public class Main {
     realPeer = new RealPeer();
     proxyPeer = new ProxyPeer(realPeer);
     proxy = (RpcProtocol) new ProxyFactory(realPeer).getProxyInstance();
+    CglibProxy proxy2 = new CglibProxy();
+    cglibProxyPeer = (RealPeer)proxy2.CreatProxyedObj(RealPeer.class);
   }
 
   private static void sendLocalMessage(RpcProtocol p) throws TException {
     long start = System.currentTimeMillis();
     for (int i = 0; i < MESSAGE_SIZE; i ++) {
       p.handleLocalMessage(CONTENT);
+    }
+    long cost = System.currentTimeMillis() - start;
+    System.out.println("time cost: " + cost + "ms");
+  }
+
+  private static void cglibSendLocalMessage() throws TException {
+    long start = System.currentTimeMillis();
+    for (int i = 0; i < MESSAGE_SIZE; i ++) {
+      cglibProxyPeer.handleLocalMessage(CONTENT);
     }
     long cost = System.currentTimeMillis() - start;
     System.out.println("time cost: " + cost + "ms");
@@ -160,16 +176,27 @@ public class Main {
     System.out.println("time cost: " + cost + "ms");
   }
 
+  private static void cglibSendMessage() throws TException {
+    long start = System.currentTimeMillis();
+    for (int i = 0; i < MESSAGE_SIZE; i ++) {
+      cglibProxyPeer.sendMessage(CONTENT);
+    }
+    long cost = System.currentTimeMillis() - start;
+    System.out.println("time cost: " + cost + "ms");
+  }
+
   public static void main(String[] args) throws TException, InterruptedException {
 //    warmUp();
 //    sendMessage(realPeer);  // 1w time cost: 420ms  100w time cost: 27961ms 300w time cost: 83471ms       后面又测 300w time cost: 83458ms 100w time cost: 28972ms
-//    sendMessage(proxyPeer); // time cost: 428ms time cost: 27378ms time cost: 82682ms       后面又测 time cost: 85581ms time cost: 29383ms
-//    sendMessage(proxy);       // time cost: 454ms // time cost: 27268ms time cost: 82834ms    后面又测 time cost: 87090ms time cost: 28419ms
+//    sendMessage(proxyPeer); // time cost: 428ms time cost: 27378ms time cost: 82682ms                     后面又测 time cost: 85581ms time cost: 29383ms
+//    sendMessage(proxy);       // time cost: 454ms // time cost: 27268ms time cost: 82834ms                后面又测 time cost: 87090ms time cost: 28419ms
+//    cglibSendMessage(); // 1w time cost: 429ms 100w time cost: 29485ms 300w time cost: 83765ms
 
     // ===================== local ====================
     beforeInstanceObj();
 //    sendLocalMessage(realPeer); // 1w time cost: 1ms 100w time cost: 5ms 300w time cost: 6ms  10亿 time cost: 44ms
 //    sendLocalMessage(proxyPeer); // time cost: 1ms time cost: 6ms time cost: 6ms 10亿 time cost: 44ms
-    sendLocalMessage(proxy); // time cost: 6ms time cost: 17ms time cost: 28ms     10亿 time cost: 3185ms
+//    sendLocalMessage(proxy); // time cost: 6ms time cost: 17ms time cost: 28ms     10亿 time cost: 3185ms
+    cglibSendLocalMessage(); // time cost: 15ms time cost: 37ms time cost: 56ms     10亿 time cost: 5214ms
   }
 }
